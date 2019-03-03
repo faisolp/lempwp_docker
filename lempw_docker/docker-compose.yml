@@ -1,53 +1,58 @@
 version: '2'
 services:
 
-  db:
-    image: mariadb:latest
-    container_name: lemp_mariadb
-    restart: always
-    volumes:
-      - ./mysql/initdb/:/docker-entrypoint-initdb.d
-      - ./mysql/data/:/var/lib/mysql
-    environment:
-      - MYSQL_ROOT_PASSWORD=123132123
-      - MYSQL_DATABASE=lemp_db
-      - MYSQL_USER=lemp
-      - MYSQL_PASSWORD=123456
+  nginx:
+          build: ./nginx/
+          container_name: nginx
+          ports:
+                  - "80:80"
+          volumes_from:
+                  - php
+          volumes:
+                  - ./nginx/conf/nginx.conf:/etc/nginx/conf/nginx.conf:ro
+                  - ./nginx/conf.d:/etc/nginx/conf.d:ro
+                  - ./logs/nginx:/var/log/nginx
+          links:
+                  - php
 
   php:
-    build: ./php
-    container_name: lemp_php-fpm
-    restart: always
-    volumes:
-      - ./www/:/var/www/html
-      - ./php/php-fpm.conf:/usr/local/etc/php-fpm.conf
-      - ./php/php.ini:/usr/local/etc/php/php.ini
-      - ./logs/php-fpm:/var/log/php-fpm
-    expose:
-      - "9000"
+          build: ./php/
+          container_name: php
+          restart: always
+          volumes:
+                  - ./www:/www
+                  - ./php/php-fpm.conf:/usr/local/etc/php-fpm.conf
+                  - ./php/php.ini:/usr/local/etc/php/php.ini
+                  - ./logs/php-fpm:/var/log/php-fpm
+          links:
+                  - mariadb
+          expose:
+                  - "9000"
+  mariadb:
+          image: mariadb:latest
+          container_name: mariadb
+          restart: always
+          volumes:                 
+                  - ./mysql/initdb/:/docker-entrypoint-initdb.d
+                  - ./mysql/data/:/var/lib/mysql
+          environment:
+                  MYSQL_ROOT_PASSWORD: PASSWORD
+                  MYSQL_USER: admin
+                  MYSQL_PASSWORD: PASSWORD
+                  MYSQL_DATABASE: projectdb
+          expose:
+                  - "3306"
 
-  nginx:
-    image: nginx:stable-alpine
-    container_name: lemp_nginx
-    restart: always
-    volumes:
-      - ./nginx/conf/nginx.conf:/etc/nginx/conf/nginx.conf:ro
-      - ./nginx/conf.d:/etc/nginx/conf.d:ro
-      - ./logs/nginx:/var/log/nginx
-    volumes_from:
-      - php
-    ports:
-      - 80:80
-
-  memcached:
-    image: memcached:1.4.31-alpine
-    container_name: lemp_memcached
-    ports:
-      - "11211:11211"
-
-  pma:
-    image: phpmyadmin/phpmyadmin
-    container_name: lemp_phpmyadmin
-    restart: always
-    ports:
-      - "8000:80"
+  phpmyadmin:
+          image: phpmyadmin/phpmyadmin
+          container_name: phpmyadmin	
+          restart: always
+          links:
+                  - mariadb
+          ports:
+                  - 8000:80
+          environment:
+                  MYSQL_USERNAME: admin
+                  MYSQL_ROOT_PASSWORD: PASSWORD
+                  PMA_HOST: 127.0.0.1
+                  PMA_ARBITRARY: 1
