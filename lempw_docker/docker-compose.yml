@@ -45,7 +45,7 @@ services:
 
   phpmyadmin:
           image: phpmyadmin/phpmyadmin
-          container_name: phpmyadmin	
+          container_name: phpmyadmin
           restart: always
           links:
                   - mariadb
