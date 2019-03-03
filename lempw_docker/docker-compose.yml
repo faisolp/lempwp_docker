@@ -3,16 +3,16 @@ services:
 
   nginx:
           build: ./nginx/
-	  container_name: nginx	
+          container_name: nginx
           ports:
                   - "80:80"
           volumes_from:
                   - php
           volumes:
               	 	
-		- ./nginx/conf/nginx.conf:/etc/nginx/conf/nginx.conf:ro
-	      	- ./nginx/conf.d:/etc/nginx/conf.d:ro
-	      	- ./logs/nginx:/var/log/nginx
+                  - ./nginx/conf/nginx.conf:/etc/nginx/conf/nginx.conf:ro
+                  - ./nginx/conf.d:/etc/nginx/conf.d:ro
+                  - ./logs/nginx:/var/log/nginx
           links:
                   - php
 
@@ -21,14 +21,14 @@ services:
 	  container_name: php
 	  restart: always
           volumes:
-                - ./www:/www
-		- ./php/php-fpm.conf:/usr/local/etc/php-fpm.conf
-      		- ./php/php.ini:/usr/local/etc/php/php.ini
-      		- ./logs/php-fpm:/var/log/php-fpm
+                  - ./www:/www
+                  - ./php/php-fpm.conf:/usr/local/etc/php-fpm.conf
+                  - ./php/php.ini:/usr/local/etc/php/php.ini
+                  - ./logs/php-fpm:/var/log/php-fpm
           links:
                   - mariadb
 	  expose:
-      		- "9000"
+                  - "9000"
   mariadb:
           image: mariadb:latest
           container_name: mariadb
